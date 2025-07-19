@@ -114,19 +114,11 @@ test.describe('API Automation with Playwright', () => {
     }
   });
 
-  test('GET non-existent user returns 404', async () => {
-    const projectConfig = test.info().project.use;
-    const apiContext = await request.newContext({
-      baseURL: projectConfig.baseURL,
-      extraHTTPHeaders: {
-        ...projectConfig.extraHTTPHeaders,
-      }
-    });
-    
+  test('GET non-existent user returns 404', async ({request}) => {    
     const userId = 100;
     console.log('\nFetching non-existent user details (ID: 100)...');
-    const userResponse = await apiContext.get(`/api/users/${userId}`);
-    
+    const userResponse = await request.get(`/api/users/${userId}`);
+
     // Assert 404 status code
     expect(userResponse.status()).toBe(404);
     console.log('✓ Response status code is 404');
