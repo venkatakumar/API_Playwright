@@ -1,7 +1,9 @@
 // tests/api.test.js
 const { test, expect, request } = require('@playwright/test');
+const expectedUserData = require('../test-data/users.json');
 
 let bearerToken = '';
+let allUsers = [];
 
 test.describe('API Automation with Playwright', () => {
   test.beforeAll(async () => {
@@ -39,10 +41,11 @@ test.describe('API Automation with Playwright', () => {
         ...projectConfig.extraHTTPHeaders,
       }
     });
-    const usersResponse = await apiContext.get('/api/users?page=2');
+    const usersResponse = await apiContext.get('/api/users?page=1');
     expect(usersResponse.ok()).toBeTruthy();
     const usersData = await usersResponse.json();
     const users = usersData.data;
+    allUsers = users; // Store users for later use
     console.log('\nValidating response data...');
     console.log('Users received:', users.length);
 
@@ -75,6 +78,39 @@ test.describe('API Automation with Playwright', () => {
     console.log('User IDs:', ids);
     for (let i = 0; i < ids.length - 1; i++) {
       expect(ids[i]).toBeLessThan(ids[i + 1]);
+    }
+  });
+
+  test('GET single user and validate details', async () => {
+    // Make GET request for single user
+    const projectConfig = test.info().project.use;
+    const apiContext = await request.newContext({
+      baseURL: projectConfig.baseURL,
+      extraHTTPHeaders: {
+        ...projectConfig.extraHTTPHeaders,
+      }
+    });
+    
+    const userId = 2;
+    console.log('\nFetching single user details for user', userId);
+    const userResponse = await apiContext.get(`/api/users/${userId}`);
+    expect(userResponse.ok()).toBeTruthy();
+    const userData = await userResponse.json();
+    const user = userData.data;
+    
+    console.log('Validating user details against expected data...');
+    
+    // Compare with expected test data
+    expect(user).toEqual(expectedUserData.user2);
+    console.log('✓ User details match expected data');
+    
+    // Verify user details are consistent with the data from previous request
+    if (allUsers.length > 0) {
+      const userInList = allUsers.find(u => u.id === userId);
+      if (userInList) {
+        expect(user).toEqual(userInList);
+        console.log('✓ User details are consistent with previous request');
+      }
     }
   });
 });
