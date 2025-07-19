@@ -136,4 +136,11 @@ test.describe('API Automation with Playwright', () => {
     expect(responseBody).toEqual({});
     console.log('✓ Response body is empty object');
   });
+
+  test('GET non-existent user returns 404 for user 99', async ({ request }) => {
+  const userId = 99;
+  const res = await request.get(`/api/users/${userId}`);
+  expect(res.status()).toBe(404);
+  expect(await res.json()).toEqual({});
+});
 });
