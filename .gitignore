@@ -3,3 +3,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Ignore Playwright's last run status file
+.last-run.json
